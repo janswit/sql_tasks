@@ -6,7 +6,7 @@
 -- I use UPPER to account for mistakes in capitalization and order by title
 SELECT  
 	f.title AS film_title, 
-    c.name AS category_name 
+    	c.name AS category_name 
 FROM 
 	film f
 INNER JOIN 
@@ -16,7 +16,7 @@ INNER JOIN
 WHERE 
 	f.release_year BETWEEN 2017 AND 2019 AND 
 	UPPER(c.name) = 'ANIMATION' AND 
-    f.rental_rate > 1 
+    	f.rental_rate > 1 
 ORDER BY 
 	f.title;
 
@@ -37,7 +37,7 @@ WHERE
 GROUP BY 
 	full_address
 ;
--- I made the connection you requested
+
 -- I join payment, rental, inventory and store tables so I can group by store_id
 -- I aldo group by full_address(column i created) to ensure that payments are aggragated properly
 -- Then based on store_id I join address table so I can get address and address2
@@ -67,7 +67,7 @@ GROUP BY
 -- I join film table because I need to set a condition for release_year
 -- I group by a.actor_id, a.first_name, a.last_name to ensure everything is aggragated properly
 SELECT  
-		a.first_name,
+	a.first_name,
         a.last_name,
         COUNT(fa.film_id) AS number_of_movies
 FROM   
@@ -89,7 +89,7 @@ LIMIT 5;
 
 /* Number of Drama, Travel, Documentary per year 
 (columns: release_year, number_of_drama_movies, number_of_travel_movies, number_of_documentary_movies), 
-sorted by release year in descending order. Dealing with NULL values is encouraged) */
+sorted by release year in descending order.
 
 -- I join film to film_category and category to retrieve neccessary data
 -- I set a condition to consider only films in the mentioned Categories 
@@ -99,7 +99,7 @@ sorted by release year in descending order. Dealing with NULL values is encourag
 -- Finally I group the results by release_year and order them in descending order
 
 SELECT 
-		f.release_year,
+	f.release_year,
         COUNT(CASE WHEN UPPER(c.name) = 'DRAMA' THEN fc.film_id END) AS number_of_drama_movies,
         COUNT(CASE WHEN UPPER(c.name) = 'TRAVEL' THEN fc.film_id END) AS number_of_travel_movies,
         COUNT(CASE WHEN UPPER(c.name) = 'DOCUMENTARY' THEN fc.film_id END) AS number_of_documentary_movies
@@ -118,13 +118,12 @@ ORDER BY
 
 
 /*Who were the top revenue-generating staff members in 2017? They should be rewarded with a bonus for their performance. 
- Please indicate which store the employee worked in. If he changed stores during 2017, indicate the last one */
 
 SELECT 
-		s.staff_id, 
-	    CONCAT(s.first_name,' ', s.last_name) AS full_name,
-	    SUM(p.amount) AS revenue_generated,
-	    s2.store_id
+	s.staff_id, 
+	CONCAT(s.first_name,' ', s.last_name) AS full_name,
+	SUM(p.amount) AS revenue_generated,
+	s2.store_id
 FROM 
 	staff s
 JOIN 
@@ -140,6 +139,7 @@ GROUP BY
 	s2.store_id
 ORDER BY 
 	revenue_generated DESC;
+
 /* Hanna Carry GENERATED the most revenue nearly doubling the NEXT best person.
 Rounding out the top 3 were Hanna Rainbow and Peter Lockyard */
 
@@ -147,16 +147,14 @@ Rounding out the top 3 were Hanna Rainbow and Peter Lockyard */
 /* Which 5 movies were rented more than others, and what's the expected age of the audience for these movies? 
  To determine expected age please use 'Motion Picture Association film rating system' */
 
--- I see where I made the mistake. I assumed wrongly rating was how good the film was,
--- not the MPA film rating system so I grouped by category to get the expected audience
 -- I join the rental, inventory and film tables so I can retrieve necessary data and make the connection
 -- I select title, rating and count rental_ids
 -- I group by title and rating and order by total_rentals desc and limit to top 5 results
 
 SELECT 
-		COUNT(r.rental_id) AS total_rentals, -- Total count OF rentals
-	    f.title,
-	    f.rating AS category_name
+	COUNT(r.rental_id) AS total_rentals, -- Total count OF rentals
+	f.title,
+	f.rating AS category_name
 FROM 
 	rental r 
 INNER JOIN 
@@ -184,7 +182,7 @@ LIMIT 5;
 -- I join film_actor, film and actor table to make the necessary connection
 -- I concat first and last name
 SELECT a.first_name,	
-		a.last_name,
+	a.last_name,
        (MAX(f.release_year) - EXTRACT(YEAR FROM CURRENT_DATE)) * -1 AS release_year_gap
 FROM 
 	film_actor fa
@@ -202,6 +200,7 @@ ORDER BY
 -- The results are sorted in a descending order so we can clearly see who hasn't starred in a movie for the longest period of time
 -- V2: gaps between sequential films per each actor
 -- I'm creating a CTE so I can join the necessary data on itself later on
+
 WITH actor_film_release AS (
     SELECT 
         fa.actor_id,
