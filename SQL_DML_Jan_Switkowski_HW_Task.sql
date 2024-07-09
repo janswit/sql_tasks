@@ -33,9 +33,10 @@ FROM
     ) AS new_films (title, description, release_year, 
                 rental_duration, rental_rate, length, 
                 replacement_cost, rating, special_features)
-WHERE NOT EXISTS (SELECT 1
-					FROM film
-					WHERE UPPER(film.title) = UPPER(new_films.title)
+WHERE NOT EXISTS 
+	(SELECT 1
+	FROM film
+	WHERE UPPER(film.title) = UPPER(new_films.title)
     				);
 
 -- Changed the way I insert data to actor table as requested
@@ -247,12 +248,12 @@ ON r.inventory_id = i.inventory_id
 JOIN film f
 ON i.film_id = f.film_id 
 WHERE r.customer_id = (SELECT customer_id 
-						FROM customer 
-						WHERE UPPER(first_name) = 'JAN' AND 
-						UPPER(last_name) = 'SWITKOWSKI') AND
-						NOT EXISTS (SELECT 1
-									FROM public.payment p
-									WHERE p.rental_id = r.rental_id);
+			FROM customer 
+			WHERE UPPER(first_name) = 'JAN' AND 
+			UPPER(last_name) = 'SWITKOWSKI') AND
+			NOT EXISTS (SELECT 1
+				    FROM public.payment p
+				    WHERE p.rental_id = r.rental_id);
 
 
 
