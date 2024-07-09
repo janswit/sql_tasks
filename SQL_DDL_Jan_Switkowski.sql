@@ -79,7 +79,6 @@ CREATE TABLE IF NOT EXISTS mc.climbers (
 );
 
 -- This seems like a very convulutated way to retrieve person_id but it seems necessary to get it right. 
--- Is there a more optimal way to retrieve it?
 -- Since two people can live under the same roof I need to get the name and the address to get the person_id
 -- and that's the way I approached it. 
 INSERT INTO mc.climbers(person_id, start_date, end_date, status)
@@ -397,24 +396,7 @@ ADD COLUMN IF NOT EXISTS record_ts DATE NOT NULL DEFAULT current_date;
 ALTER TABLE mc.weather_forecasts
 ADD COLUMN IF NOT EXISTS record_ts DATE NOT NULL DEFAULT current_date;
 
-/* Not finished, had trouble figuring out how to insert data while avoiding duplicates
- INSERT INTO mc.guide_group_assignment(guide_id)
-VALUES (SELECT guide_id FROM  mc.guides g
-							WHERE lower(g.first_name) = 'pawel' AND lower(g.last_name) = 'kowalski')
 
-
-INSERT INTO mc.climb_groups
-SELECT (VALUES
-	((SELECT guide_group_id FROM mc.guide_group_assignment gga
-							JOIN mc.guides g
-							ON gga.guide_id = g.guide_id
-							WHERE lower(g.first_name) = 'pawel' AND lower(g.last_name) = 'kowalski'), 0),
-	((SELECT guide_group_id FROM mc.guide_group_assignment gga
-							JOIN mc.guides g
-							ON gga.guide_id = g.guide_id
-							WHERE lower(g.first_name) = 'karol' AND lower(g.last_name) = 'nowak'), 0)
-);
- */	
 
 							
 
