@@ -89,7 +89,7 @@ LIMIT 5;
 
 /* Number of Drama, Travel, Documentary per year 
 (columns: release_year, number_of_drama_movies, number_of_travel_movies, number_of_documentary_movies), 
-sorted by release year in descending order.
+sorted by release year in descending order. */
 
 -- I join film to film_category and category to retrieve neccessary data
 -- I set a condition to consider only films in the mentioned Categories 
@@ -117,7 +117,7 @@ ORDER BY
 	f.release_year DESC;
 
 
-/*Who were the top revenue-generating staff members in 2017? They should be rewarded with a bonus for their performance. 
+/*Who were the top revenue-generating staff members in 2017? They should be rewarded with a bonus for their performance. */
 
 SELECT 
 	s.staff_id, 
@@ -166,6 +166,7 @@ GROUP BY
 ORDER BY 
 	total_rentals DESC 
 LIMIT 5; 
+
 /* There are two movies that are rated NC-17 which means 'No one 17 and under admitted'. 
  * This clearly means that those films are meant for adults and hopefully that's the majority of the audience
  * There are also two movies rated PG-13 which means that Parents are strongly cautioned
@@ -181,6 +182,7 @@ LIMIT 5;
 
 -- I join film_actor, film and actor table to make the necessary connection
 -- I concat first and last name
+
 SELECT a.first_name,	
 	a.last_name,
        (MAX(f.release_year) - EXTRACT(YEAR FROM CURRENT_DATE)) * -1 AS release_year_gap
