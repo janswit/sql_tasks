@@ -7,35 +7,24 @@
 SELECT  
 	f.title AS film_title, 
     	c.name AS category_name 
-FROM 
-	film f
-INNER JOIN 
-	film_category fc ON f.film_id = fc.film_id 
-INNER JOIN 
-	category c ON fc.category_id = c.category_id 
-WHERE 
-	f.release_year BETWEEN 2017 AND 2019 AND 
-	UPPER(c.name) = 'ANIMATION' AND 
-    	f.rental_rate > 1 
+FROM film f
+INNER JOIN film_category fc ON f.film_id = fc.film_id 
+INNER JOIN category c ON fc.category_id = c.category_id 
+WHERE f.release_year BETWEEN 2017 AND 2019 AND 
+      UPPER(c.name) = 'ANIMATION' AND 
+      f.rental_rate > 1 
 ORDER BY 
 	f.title;
 
 -- `the revenue earned by each rental store after March 2017 (columns: address and address2 – as one column, revenue)
-SELECT 
-	SUM(p.amount),
+SELECT SUM(p.amount),
 	CONCAT(a.address, ' ', COALESCE(a.address2)) AS full_address 
-FROM 
-	payment p 
-INNER JOIN 
-	staff s ON p.staff_id = s.staff_id 
-INNER JOIN 
-	store s2 ON s.store_id = s2.store_id 
-INNER JOIN 
-	address a ON s2.address_id = a.address_id 
-WHERE 
-	p.payment_date > '2017-03-31'
-GROUP BY 
-	full_address
+FROM payment p 
+INNER JOIN staff s ON p.staff_id = s.staff_id 
+INNER JOIN store s2 ON s.store_id = s2.store_id 
+INNER JOIN address a ON s2.address_id = a.address_id 
+WHERE p.payment_date > '2017-03-31'
+GROUP BY full_address
 ;
 
 -- I join payment, rental, inventory and store tables so I can group by store_id
@@ -43,47 +32,32 @@ GROUP BY
 -- Then based on store_id I join address table so I can get address and address2
 -- I sum up the the payment amoounts as requested
 -- I use concat to join address and address2 and coalesce to handle potential null values
-SELECT 
-	SUM(p.amount),
+SELECT SUM(p.amount),
 	CONCAT(a.address, ' ', COALESCE(a.address2)) AS full_address 
-FROM 
-	payment p 
-INNER JOIN 
-	rental r ON p.rental_id = r.rental_id 
-INNER JOIN 
-	inventory i ON r.inventory_id = i.inventory_id
-INNER JOIN 
-	store s ON i.store_id = s.store_id 
-INNER JOIN 
-	address a ON a.address_id = s.address_id
-WHERE 
-	p.payment_date > '2017-03-31'
-GROUP BY 
-	i.store_id, full_address;
+FROM payment p 
+INNER JOIN rental r ON p.rental_id = r.rental_id 
+INNER JOIN inventory i ON r.inventory_id = i.inventory_id
+INNER JOIN store s ON i.store_id = s.store_id 
+INNER JOIN address a ON a.address_id = s.address_id
+WHERE p.payment_date > '2017-03-31'
+GROUP BY i.store_id, full_address;
 
 -- Top-5 actors by number of movies (released after 2015) they took part in (columns: first_name, last_name, number_of_movies, sorted by number_of_movies in descending order)
 -- Here I'm selecting film_ids from film_actor, as well as first_name and last name from actor
 -- I have to join actor table to film_actor so I can retrieve actors' names based on id
 -- I join film table because I need to set a condition for release_year
 -- I group by a.actor_id, a.first_name, a.last_name to ensure everything is aggragated properly
-SELECT  
-	a.first_name,
+SELECT  a.first_name,
         a.last_name,
         COUNT(fa.film_id) AS number_of_movies
-FROM   
-	film_actor fa 
-JOIN 
-	actor a ON fa.actor_id = a.actor_id
-JOIN 
-	film f ON fa.film_id = f.film_id
-WHERE 
-	f.release_year > 2015 
-GROUP BY 
-	a.actor_id,
-	a.first_name,
-    a.last_name		
-ORDER BY 
-	number_of_movies DESC 
+FROM   film_actor fa 
+JOIN actor a ON fa.actor_id = a.actor_id
+JOIN film f ON fa.film_id = f.film_id
+WHERE f.release_year > 2015 
+GROUP BY a.actor_id,
+	 a.first_name,
+         a.last_name		
+ORDER BY number_of_movies DESC 
 LIMIT 5; 
 
 
@@ -98,47 +72,33 @@ sorted by release year in descending order. */
 -- I do conditional count functions that count number of films that belong to a specific category 
 -- Finally I group the results by release_year and order them in descending order
 
-SELECT 
-	f.release_year,
+SELECT f.release_year,
         COUNT(CASE WHEN UPPER(c.name) = 'DRAMA' THEN fc.film_id END) AS number_of_drama_movies,
         COUNT(CASE WHEN UPPER(c.name) = 'TRAVEL' THEN fc.film_id END) AS number_of_travel_movies,
         COUNT(CASE WHEN UPPER(c.name) = 'DOCUMENTARY' THEN fc.film_id END) AS number_of_documentary_movies
-FROM 
-	film f
-JOIN 
-	film_category fc ON f.film_id = fc.film_id
-JOIN 
-	category c ON fc.category_id = c.category_id
-WHERE 
-	UPPER(c.name) IN ('DRAMA', 'TRAVEL', 'DOCUMENTARY') 
-GROUP BY 
-	f.release_year 
-ORDER BY 
-	f.release_year DESC;
+FROM film f
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+WHERE UPPER(c.name) IN ('DRAMA', 'TRAVEL', 'DOCUMENTARY') 
+GROUP BY f.release_year 
+ORDER BY f.release_year DESC;
 
 
 /*Who were the top revenue-generating staff members in 2017? They should be rewarded with a bonus for their performance. */
 
-SELECT 
-	s.staff_id, 
+SELECT s.staff_id, 
 	CONCAT(s.first_name,' ', s.last_name) AS full_name,
 	SUM(p.amount) AS revenue_generated,
 	s2.store_id
-FROM 
-	staff s
-JOIN 
-	payment p ON s.staff_id = p.staff_id
-JOIN 
-	store s2 ON s.store_id = s2.store_id 
-WHERE 
-	EXTRACT(YEAR FROM p.payment_date) = 2017 
-GROUP BY 
-	s.staff_id, 
+FROM staff s
+JOIN payment p ON s.staff_id = p.staff_id
+JOIN store s2 ON s.store_id = s2.store_id 
+WHERE EXTRACT(YEAR FROM p.payment_date) = 2017 
+GROUP BY s.staff_id, 
 	s.first_name, 
 	s.last_name, 
 	s2.store_id
-ORDER BY 
-	revenue_generated DESC;
+ORDER BY revenue_generated DESC;
 
 /* Hanna Carry GENERATED the most revenue nearly doubling the NEXT best person.
 Rounding out the top 3 were Hanna Rainbow and Peter Lockyard */
@@ -151,20 +111,14 @@ Rounding out the top 3 were Hanna Rainbow and Peter Lockyard */
 -- I select title, rating and count rental_ids
 -- I group by title and rating and order by total_rentals desc and limit to top 5 results
 
-SELECT 
-	COUNT(r.rental_id) AS total_rentals, -- Total count OF rentals
+SELECT COUNT(r.rental_id) AS total_rentals, -- Total count OF rentals
 	f.title,
 	f.rating AS category_name
-FROM 
-	rental r 
-INNER JOIN 
-	inventory i ON r.inventory_id = i.inventory_id 
-INNER JOIN 
-	film f ON i.film_id = f.film_id 
-GROUP BY 
-	f.title, f.rating
-ORDER BY 
-	total_rentals DESC 
+FROM rental r 
+INNER JOIN inventory i ON r.inventory_id = i.inventory_id 
+INNER JOIN film f ON i.film_id = f.film_id 
+GROUP BY f.title, f.rating
+ORDER BY total_rentals DESC 
 LIMIT 5; 
 
 /* There are two movies that are rated NC-17 which means 'No one 17 and under admitted'. 
@@ -186,17 +140,12 @@ LIMIT 5;
 SELECT a.first_name,	
 	a.last_name,
        (MAX(f.release_year) - EXTRACT(YEAR FROM CURRENT_DATE)) * -1 AS release_year_gap
-FROM 
-	film_actor fa
-JOIN 
-	film f ON fa.film_id = f.film_id
-JOIN 
-	actor a ON fa.actor_id = a.actor_id
-GROUP BY 
-		a.first_name,
-		a.last_name
-ORDER BY 
-	release_year_gap DESC;
+FROM film_actor fa
+JOIN film f ON fa.film_id = f.film_id
+JOIN actor a ON fa.actor_id = a.actor_id
+GROUP BY a.first_name,
+	a.last_name
+ORDER BY release_year_gap DESC;
 
 
 -- The results are sorted in a descending order so we can clearly see who hasn't starred in a movie for the longest period of time
@@ -209,12 +158,9 @@ WITH actor_film_release AS (
         a.first_name,
         a.last_name,
         f.release_year
-    FROM 
-        film_actor fa
-    JOIN 
-        film f ON fa.film_id = f.film_id
-    JOIN 
-        actor a ON fa.actor_id = a.actor_id
+    FROM film_actor fa
+    JOIN film f ON fa.film_id = f.film_id
+    JOIN actor a ON fa.actor_id = a.actor_id
 ),
 /* As mentioned above, I join actor_film_release on itself using actor_id
  Now I have two release_year columns next to each other. 
@@ -229,12 +175,9 @@ gap_calculated AS (
         afr.release_year AS release_year,
         afr1.release_year AS release_year_two,
         afr1.release_year - afr.release_year AS min_gap
-    FROM 
-        actor_film_release afr
-    JOIN 
-        actor_film_release afr1 ON afr.actor_id = afr1.actor_id
-    WHERE 
-        afr1.release_year - afr.release_year >= 1
+    FROM actor_film_release afr
+    JOIN actor_film_release afr1 ON afr.actor_id = afr1.actor_id
+    WHERE afr1.release_year - afr.release_year >= 1
     GROUP BY 
         afr.first_name, 
         afr.last_name, 
@@ -251,18 +194,16 @@ SELECT
     actor_last_name,
     MAX(min_gap) as max_unemployed
 FROM 
-    (
-        SELECT 
-            gc.actor_first_name,
-            gc.actor_last_name,
-            gc.release_year,
-            MIN(gc.min_gap) AS min_gap
-        FROM 
-            gap_calculated gc
-        GROUP BY 
-            gc.actor_first_name,
-            gc.actor_last_name,
-            gc.release_year
+    (SELECT 
+        gc.actor_first_name,
+        gc.actor_last_name,
+        gc.release_year,
+        MIN(gc.min_gap) AS min_gap
+     FROM gap_calculated gc
+     GROUP BY 
+        gc.actor_first_name,
+        gc.actor_last_name,
+        gc.release_year
     )
 GROUP BY 
     actor_first_name, 
@@ -309,12 +250,9 @@ WITH actor_film_release AS (
         a.last_name,
         f.title AS film_title,
         f.release_year
-    FROM 
-        film_actor fa
-    JOIN 
-        film f ON fa.film_id = f.film_id
-    JOIN 
-        actor a ON fa.actor_id = a.actor_id
+    FROM film_actor fa
+    JOIN film f ON fa.film_id = f.film_id
+    JOIN actor a ON fa.actor_id = a.actor_id
 ),
 gap_calculated AS (
     SELECT 
@@ -322,23 +260,20 @@ gap_calculated AS (
         afr.last_name AS actor_last_name,
         afr.release_year AS release_year,
         MIN(afr1.release_year) AS release_year_two        
-    FROM 
-        actor_film_release afr
-    JOIN 
-        actor_film_release afr1 ON afr.actor_id = afr1.actor_id
-    WHERE 
-        afr1.release_year - afr.release_year >= 1
+    FROM actor_film_release afr
+    JOIN actor_film_release afr1 ON afr.actor_id = afr1.actor_id
+    WHERE afr1.release_year - afr.release_year >= 1
     GROUP BY 
         afr.first_name, 
         afr.last_name, 
         afr.release_year        
        )
  SELECT gc.actor_first_name,
- 		gc.actor_last_name,
- 		SUM(gc.release_year_two - gc.release_year) AS total_unemployed
+ 	gc.actor_last_name,
+ 	SUM(gc.release_year_two - gc.release_year) AS total_unemployed
  FROM gap_calculated gc
  WHERE gc.release_year_two - gc.release_year > 1
  GROUP BY gc.actor_first_name,
- 		  gc.actor_last_name
+ 	 gc.actor_last_name
  ORDER BY total_unemployed DESC
 ;
