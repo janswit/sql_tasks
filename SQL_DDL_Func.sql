@@ -83,8 +83,8 @@ BEGIN
 		v_country_found := FALSE;
 		
 		SELECT EXISTS (SELECT 1 FROM country c3 
-								WHERE lower(c3.country) = lower(v_country_name))
-			INTO v_country_found;
+				WHERE lower(c3.country) = lower(v_country_name))
+				INTO v_country_found;
 		
 		IF NOT v_country_found THEN
 			RAISE EXCEPTION 'Country with specified name does not exist: %', v_country_name;
@@ -93,18 +93,18 @@ BEGIN
 
 		RETURN QUERY SELECT c3.country, f.title, f.rating, l.name::VARCHAR AS language_name, 
 							f.length, f.release_year
-			FROM film f
-				JOIN inventory i ON f.film_id = i.film_id
-				JOIN rental r ON i.inventory_id = r.inventory_id 
-				JOIN customer c ON r.customer_id = c.customer_id 
-				JOIN address a ON c.address_id = a.address_id 
-				JOIN city c2 ON a.city_id = c2.city_id 
-				JOIN country c3 ON c2.country_id = c3.country_id
-				JOIN "language" l ON f.language_id = l.language_id
-			WHERE lower(c3.country) = lower(v_country_name)
-			GROUP BY c3.country, f.title, f.rating, l.name, f.length, f.release_year 
-			ORDER BY count(r.rental_id) DESC 
-			LIMIT 1;
+		FROM film f
+		JOIN inventory i ON f.film_id = i.film_id
+		JOIN rental r ON i.inventory_id = r.inventory_id 
+		JOIN customer c ON r.customer_id = c.customer_id 
+		JOIN address a ON c.address_id = a.address_id 
+		JOIN city c2 ON a.city_id = c2.city_id 
+		JOIN country c3 ON c2.country_id = c3.country_id
+		JOIN "language" l ON f.language_id = l.language_id
+		WHERE lower(c3.country) = lower(v_country_name)
+		GROUP BY c3.country, f.title, f.rating, l.name, f.length, f.release_year 
+		ORDER BY count(r.rental_id) DESC 
+		LIMIT 1;
 		END LOOP;
 END;
 $$;
@@ -136,15 +136,15 @@ BEGIN
 	END IF;
 
 	FOR rec IN SELECT f.title, 
-					  l.name, 
-					  r.rental_date, 
-					  c.first_name || ' ' || c.last_name AS customer_name
-				FROM film f 
-				JOIN "language" l ON f.language_id = l.language_id 
-				JOIN inventory i ON f.film_id =i.film_id 
-				JOIN rental r ON i.inventory_id = r.inventory_id 
-				JOIN customer c ON r.customer_id = c.customer_id 
-				WHERE f.title ILIKE '%' || title_word || '%'				
+			  l.name, 
+			  r.rental_date, 
+			  c.first_name || ' ' || c.last_name AS customer_name
+		   FROM film f 
+		   JOIN "language" l ON f.language_id = l.language_id 
+		   JOIN inventory i ON f.film_id =i.film_id 
+		   JOIN rental r ON i.inventory_id = r.inventory_id 
+		   JOIN customer c ON r.customer_id = c.customer_id 
+		   WHERE f.title ILIKE '%' || title_word || '%'				
 	LOOP
 		counter := row_counter;
 		title := rec.title;
