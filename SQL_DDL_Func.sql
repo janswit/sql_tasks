@@ -7,20 +7,20 @@
  * sum(p.amount) > 0 to ensure that there was at least one sale.
  */
 
-CREATE OR REPLACE VIEW public.sales_revenue_by_category_qtr
-AS SELECT c.name AS category,
-    sum(p.amount) AS total_sales
-   FROM payment p
+CREATE OR REPLACE VIEW public.sales_revenue_by_category_qtr AS 
+     SELECT c.name AS category,
+    	sum(p.amount) AS total_sales
+     FROM payment p
      JOIN rental r ON p.rental_id = r.rental_id
      JOIN inventory i ON r.inventory_id = i.inventory_id
      JOIN film f ON i.film_id = f.film_id
      JOIN film_category fc ON f.film_id = fc.film_id
      JOIN category c ON fc.category_id = c.category_id
-    WHERE EXTRACT(YEAR FROM p.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE) AND 
+     WHERE EXTRACT(YEAR FROM p.payment_date) = EXTRACT(YEAR FROM CURRENT_DATE) AND 
     	  EXTRACT(QUARTER FROM p.payment_date) = EXTRACT(QUARTER FROM CURRENT_DATE)
-  GROUP BY c.name
-  HAVING sum(p.amount) > 0
-  ORDER BY (sum(p.amount)) DESC;
+     GROUP BY c.name
+     HAVING sum(p.amount) > 0
+     ORDER BY (sum(p.amount)) DESC;
  
  -- SELECT * FROM sales_revenue_by_category_qtr;
 
