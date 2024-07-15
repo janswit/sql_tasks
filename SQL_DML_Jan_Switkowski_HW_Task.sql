@@ -238,10 +238,10 @@ WHERE NOT EXISTS (
 INSERT INTO public.payment
 (customer_id, staff_id, rental_id, amount, payment_date)
 SELECT r.customer_id,
-		r.staff_id,
-		r.rental_id,
-		f.rental_rate,
-		r.rental_date
+	r.staff_id,
+	r.rental_id,
+	f.rental_rate,
+	r.rental_date
 FROM rental r
 JOIN inventory i
 ON r.inventory_id = i.inventory_id 
