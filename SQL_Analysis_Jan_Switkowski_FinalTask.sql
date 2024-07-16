@@ -28,10 +28,11 @@ ORDER BY sales DESC;
 -- I use LAG to to create column with cumulative sales from previous year which I will use to compare values
 WITH yoy AS(
 	SELECT
-       	p.prod_subcategory,
-        t.calendar_year,
-        SUM(s.quantity_sold * s.amount_sold) AS current_sales,
-        LAG(SUM(s.quantity_sold * s.amount_sold)) OVER (PARTITION BY p.prod_subcategory ORDER BY t.calendar_year) AS previous_year_sales
+       		p.prod_subcategory,
+        	t.calendar_year,
+        	SUM(s.quantity_sold * s.amount_sold) AS current_sales,
+        	LAG(SUM(s.quantity_sold * s.amount_sold)) OVER (PARTITION BY p.prod_subcategory 
+								ORDER BY t.calendar_year) AS previous_year_sales
 	FROM sh.sales s
 	JOIN sh.products p ON s.prod_id = p.prod_id
 	JOIN sh.times t ON s.time_id = t.time_id
@@ -40,8 +41,7 @@ WITH yoy AS(
 )
 -- I group by product_subcategory and SET a condition that the minimum difference has to be larger than 0
 -- and select distinct prod_subcategories
-SELECT 
-    DISTINCT prod_subcategory
+SELECT DISTINCT prod_subcategory
 FROM yoy
 WHERE calendar_year BETWEEN 1998 AND 2001
 GROUP BY prod_subcategory
@@ -59,8 +59,7 @@ WITH quarter_sales AS (
         t.calendar_quarter_desc,
         p.prod_category,
         SUM(s.quantity_sold * s.amount_sold) AS sales
-    FROM 
-        sh.sales s
+    FROM sh.sales s
     JOIN sh.products p ON s.prod_id = p.prod_id
     JOIN sh.times t ON s.time_id = t.time_id
     JOIN sh.channels c ON s.channel_id = c.channel_id
@@ -96,13 +95,13 @@ calculations AS (
 -- In final select I mostly do formatting
 -- I use CASE statement to apply N/A to values from first quarter
 SELECT calendar_year,
-	   calendar_quarter_desc,
-	   prod_category,
-	   TO_CHAR(sales, '999,999,999.99') AS "sales$",
-	   CASE 
-	       WHEN calendar_quarter_desc IN ('1999-01', '2000-01') THEN 'N/A'
-	       ELSE TO_CHAR(diff_percent, '999.99') || '%'
-	   END  AS diff_percent,
-	   TO_CHAR(cum_sales, '999,999,999.99')
+	calendar_quarter_desc,
+	prod_category,
+	TO_CHAR(sales, '999,999,999.99') AS "sales$",
+	CASE 
+	    WHEN calendar_quarter_desc IN ('1999-01', '2000-01') THEN 'N/A'
+	    ELSE TO_CHAR(diff_percent, '999.99') || '%'
+	END  AS diff_percent,
+	TO_CHAR(cum_sales, '999,999,999.99')
 FROM calculations
 ORDER BY calendar_quarter_desc ASC, "sales$" DESC;
